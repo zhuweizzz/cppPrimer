@@ -1,28 +1,18 @@
 #include <iostream>
+#include <string>
 #include <windows.h>
+#include <cctype>
+#include <typeinfo>
 
 using namespace std;
 
+
 int main()
 {
-    int currVal=0, val=0;
+    string s;
+    char a='a';
 
-    const int &r1=currVal;
-   
-
-    if(cin>>currVal){
-        int cnt =1;
-        while(cin>>val)
-        {
-            if(val == currVal)
-                cnt++;
-            else
-            {
-                cout << currVal << endl;
-            }
-            
-        }
-    }
+    cout << typeid(a).name() << endl;
 
     system("pause");
 
