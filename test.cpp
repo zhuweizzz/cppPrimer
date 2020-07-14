@@ -3,18 +3,22 @@
 #include <windows.h>
 #include <cctype>
 #include <typeinfo>
+#include <vector> 
 
 using namespace std;
 
 
 int main()
 {
-    string s;
-    char a='a';
+    string s("hello world");
 
-    cout << typeid(a).name() << endl;
+    for (auto &c : s)
+        c = toupper(c);
+
+    cout << s << endl;
+
+
 
     system("pause");
-
     return 0;
 }
