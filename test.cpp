@@ -4,6 +4,7 @@
 #include <cctype>
 #include <typeinfo>
 #include <vector> 
+#include <iterator>
 
 using namespace std;
 
