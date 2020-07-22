@@ -17,7 +17,7 @@ int main()
     auto beg = v1.begin();
 
     auto end = v1.end();
-
+    
     --end;
 
     while( beg <= end )
