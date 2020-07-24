@@ -20,7 +20,7 @@ int main()
         for(auto &j : v1[i])
             j=toupper(j);
         cout << v1[i] <<endl;
-    }
+    }  
 
     system("pause");
 
