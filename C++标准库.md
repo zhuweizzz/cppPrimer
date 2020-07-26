@@ -69,4 +69,104 @@
     >在c++11中有成员函数版本的swap和非成员版本的swap。更常用非成员函数版本的swap
 
 
+* 关系运算符
+    每个容器类型都支持相等运算符(==和!=)，除了无序关联容器外的所有容器都支持关系运算符（>,>=,<,<=）。关系运算符两边运算对象必须是相同类型的容器，且必须保存相同类型的元素。  
+    比较的规则:  
+    * 如果两个容器一样大，并且对应元素都相等，则两个容器相等。
+    * 如果两个容器大小不同，但小容器中每个元素都等于较大容器中对应的元素，则较小容器小于较大容器
+    * 如果两个容器都不是另一个容器的前缀子序列，则其比较结构取决于第一个不相等的元素。  
+    **容器的关系运算符使用元素的关系运算符完成比较**
+    >只有当其元素类型也定义了相应的比较运算符时，我们才可以使用关系运算符来比较两个容器
 
+### 顺序容器的操作  
+>顺序容器与关联容器的不同之处在于两者组织元素的方式不同，这些不同之处直接关系到元素如何存储、访问、添加以及删除。除了所有容器都支持的操作外，顺序容器特有的操作。
+
+* 向顺序容器中添加元素  
+    除array外，所有标准库都有灵活的内存管理，可以在运行时动态添加删除元素来改变容器大小。  
+    forward_list有自己专有版本的insert和emplace；  
+    forward_list不支持push_back和emplace_back;  
+    vector和string不支持push_front和emplace_front；
+    ```cpp
+    c.push_back(t);
+    c.emplace_back(args);  //在c的尾部创建一个值为t的元素或由args创建的元素。
+    c.push_front(t);
+    c.emplace_front(args);//在c的头部创建一个值为t的元素或由args创建的元素
+    c.insert(p,t) 
+    c.emplace(p,args);//在迭代器p指向的元素之前创建一个值为t或由args创建的元素。返回指向新添加元素的迭代器
+    c.insert(p,n,t); //在迭代器p指向的元素之前插入n个值为t的元素。返回指向第一个元素的迭代器。若n为0，则返回p；
+    c.insert(p,b,e); // 将迭代器p和e指定的范围内的元素插入到迭代器p指向的元素之前。返回新添加的第一个元素的迭代器。
+    c.insert(p,il); //其中il一个由花括号包围的元素值列表。将这些给定值插入到迭代器p指向的元素之前。返回新添加的第一个元素的迭代器。  
+    ```
+    >向一个vector、string或deque插入元素会使所有指向容器的迭代器、指针和引用失效
+
+* 使用push_back  
+    push_back将元素追加到容器的尾部。除了array和forward_list之外，每个顺序容器(包括string类型)都支持push_back。
+    >容器元素是拷贝：当使用一个对象来初始化容器时，或者是将一个对象插入到容器中时，实际上放入容器的是对象值的一个拷贝，而不是对象本身，容器中元素与提供值的的对象之间没有任何关联。
+
+* 使用push_front  
+    除了push_back,list、forward_list、deque容器还支持名push_front的类似操作。此操作将元素插入到容器头部。
+
+* 在容器中的特定位置插入元素  
+    使用insert,insert运行在容器中的任意位置添加0个或多个元素。vector、deque、list和string都支持insert成员。而forward_list提供了特殊版本的insert成员。insert函数接收一个迭代器类型的参数，迭代器指出了容器在什么位置放新元素，并且insert函数总是将新元素插入到指定元素之前
+
+* insert的返回值
+    insert的返回值指向新插入的元素，所以可以反复在一个位置插入元素。
+    ```cpp
+    list<string> lst;
+    auto iter = lst.begin();
+    while(cin >> word)
+        iter = list(iter , word); 
+    ```
+    该循环每次都将新元素插入到list首元素之前的位置。
+
+* emplace操作  
+     新标准的三个成员emplace_front、emplace、emplace_back，这些操作构造而不是拷贝元素。    
+     调用emplace，会在容器管理的内存空间中直接创建对象。而调用push_back则会创建一个局部临时对象
+     >emplace函数在容器中直接构造元素。传递给emplace函数的参数必须与元素类型的构造函数相匹配。
+
+* 访问元素  
+    包括array在内的每个元素都有一个front成员函数，而除forward_list之外的所有顺序容器都有一个back成员函数。两个操作分别返回首元素和尾元素的**引用**
+    >在容器中访问元素的成员函数（front、back、下标和at）返回的都是引用，在用auto变量来保存返回值时，如果希望用此变量来改变元素的值，必须记得将变量定义为引用类型
+
+* 删除元素
+    (非array)容器也有很多删除元素的方式。  
+    forward_list有特殊版本的erase;   
+    forward_list不支持pop_back;vector和string不支持pop_front
+    ```cpp
+    c.pop_back();  //删除c中尾元素。若c为空函数行为未定义。函数返回void
+    c.pop_front(); //删除c中首元素。若c为空函数行为未定义。函数返回void
+    c.erase(p);  //删除迭代器指定的元素，返回一个指向被删元素之后元素的迭代器。若p指向尾元素，则返回尾后迭代器，若p为尾后迭代器，则函数行为未定义。
+    c.erase(b,e); //删除迭代器b和e所指定范围内的元素。返回一个指向最后一个被删元素之后元素的迭代器，若e本身就是尾后迭代器，则返回尾后迭代器。
+    c.clear(); //删除c中所有元素，返回void
+    ```
+    >删除元素的成员函数不检查参数。
+
+* 特殊的forward_list操作  
+    由于链表数据结构本身的特殊性，使得其添加与删除操作与其他容器上的操作的实现方式不同，所有其定义了名为insert_after、emplace_after和erase_after的操作。并且forward_list还定义了**before_begin**,它返回一个首前迭代器。
+    ```cpp
+    lst.before_begin(); 
+    lst.cbefore_begin(); //返回指向链表首元素之前不存在的元素的迭代器，此迭代器不能解引用,带c的返回const_iterator
+    lst.insert_after(p,t); //在迭代器p之后的位置插入元素
+    lst.insert_after(p,n,t);
+    lst.insert_after(p,b,e);
+    lst.insert_after(p.il);
+
+    emplace_after(p,args); //使用args在p指定的位置之后创建一个元素。返回一个指向这个新元素的迭代器。若p为尾后迭代器，则函数行为未定义。
+
+    lst.erase_after(p);
+    lst.erase_after(b,e);//删除p指向的位置之后的元素，或删除b之后知道e之间的元素，返回一个指向被删除元素之后元素的迭代器，若不存在，则返回尾后迭代器。
+    ```
+    >在forward_list中添加与删除元素，要始终关注两个迭代器，一个指向要处理的元素，一个指向其前驱元素
+
+* 改变容器大小  
+    可以用resize来增大或缩小容器，array不支持resize。如果当前大小大于所要求的大小，容器后部的元素会被删除；如果当前大小小于新大小，会将新元素添加到容器后部：
+    ```cpp
+    list<int> ilist(10,42); //10个int：每个值都是42
+    ilist.resize(15);  //将5个值为0的元素添加到list的末尾
+    ilist.resize(25,-1);  //将10个+1的元素添加到ilist的末尾
+    ilist.resize(5); //从ilist末尾删除20个元素
+    ```
+
+* 容器操作可能使迭代器失效
+    
+      

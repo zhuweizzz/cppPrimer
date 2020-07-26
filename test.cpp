@@ -9,7 +9,7 @@
 #include <sstream>
 #include <deque>
 #include <list>
-#include <array>
+#include <forward_list>
 
 
 using namespace std;
@@ -17,15 +17,44 @@ using namespace std;
 
 int main()
 {
-    vector<string> v1;
-    string s;
+    int ia[] = {0,1,1,2,3,5,8,13,21,55,89};
 
-    list<char *> ls{"testchar"};
+    list<int> vls(begin(ia),end(ia));
+    vector<int> vvec(begin(ia),end(ia));
 
-    v1.assign(ls.begin(),ls.end());
+    auto beg = vls.begin();
+    auto ite = vvec.begin();
 
-    for(auto const &t : v1)
-        cout << t << endl;
+    while(beg != vls.end())
+    {
+        if(*beg % 2)
+        {
+            beg = vls.erase(beg);
+        }
+        else
+        {
+            ++beg;
+        }
+    }
+
+    while(ite !=vvec.end())
+    {
+        if(*ite % 2)
+        {
+            ite++;
+        }
+        else
+        {
+            ite = vvec.erase(ite);
+        }
+    }
+
+
+    for(auto &t : vls)
+        cout << t <<endl;
+
+    for(auto &t : vvec)
+        cout << t <<endl;
 
     system("pause");
 
