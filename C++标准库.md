@@ -257,7 +257,7 @@ vector支持随机访问，vector将元素连续存储。向vector或string中�
 ​	通过插入迭代器赋值时，一个赋值号右侧相等的元素被添加到容器中。
 
 ​	`back_inserter` 函数-定义在头文件`iterator`中。其接收一个指向容器的引用，返回一个与该容器绑定的插入迭代器。
-
+ 
 ##### 拷贝算法`copy` 
 
 ​	向目的位置迭代器指向的元素写入数据的另一种方法。接受三个参数：起始位置迭代器和目的位置迭代器。
@@ -305,11 +305,145 @@ stable_sort(words.begin(),words.end(),
     [sz](const string &a)
         { return a.size() >=sz } //使用局部变量sz
     ```
-    
+* `find_if`、`for_each`  
+    `for_each`算法，此算法接受一个可调用对象，对输入序列的每一个元
+    素调用该对象。
+
+    >lambda表达式的捕获列表只用于局部非static变量，其可以直接使用局部static变量和在函数之外声明的名字。
+
+##### lambda捕获和返回     
+lambda的捕获方式有**值捕获**或者**引用捕获**。  
+```cpp
+auto f = [v1] { return v1;} //值捕获，此处使用auto定义一个用lambda表达式初始化的对象
+auto f2 = [&v1] { return v1;} //引用捕获
+ ```
+值捕获使用的是捕获变量的拷贝，引用捕获使用的是引用指向的对象本身
+>如果可能的话，避免捕获指针和引用
+
+* 隐式捕获和显示捕获  
+    在捕获列表中使用`&`和`=`符号来表示默认的捕获方式，从而根据表达式内使用的变量，自动推断使用的变量。`&`为引用捕获，`=`为值捕获。
+    混合使用隐式捕获和显式捕获：
+    * 捕获列表第一个必须为一个`&`或`=`，其指定了默认的捕获方式
+    * 显式捕获必须使用与隐式捕获不同的方式
+    ```cpp
+    [& , c] (const string &s) { os << s << c;} //显式值捕获c，os隐式捕获
+    [= , &os] (const string &s) { os << s << c;}//隐式值捕获c，显式引用捕获os。os为流对象只能使用引用捕获
+    ```
+
+* 可变lambda  
+    希望改变被捕获变量的值时，使用mutable关键字。
+    ```cpp
+    auto f = [v1] () multable { return ++v1 };
+    ```
+
+* 指定lambda类型  
+    当lambda表达式的函数体中除了return语句外无其他语句，可以由编译器推断出返回类型，当除了return语句还有其他语句时，需要指定返回类型，否则返回void。指定类型时必须使用尾置返回类型。
+     ```cpp
+     transform(v1.begin(), v1.end(), v1.begin(),
+            [](int i) -> int
+            { if (i < 0) return -i; else return i; });
+     ```
+
+##### 参数绑定
+一般情况下，对于在很少情况下使用的简单操作lambda表达式是最有用的，如果需要在更多的地方使用相同的操作时，通常定义一个函数，而且如果一个操作要很多语句才能完成也应该使用函数。  
+但将函数作为算法的谓词时，对于捕获列表为不为空的lambda表达式，用函数来替换时，由于谓词只能严格为一元或二元谓词，只能固定接受一个或两个参数。  
+所以为了用函数代替lambda表达式需要使用`bind`进行参数绑定，定义在`functional`中。
+
+#### 标准库迭代器
+除了为容器定义的迭代器外，在标准库中还定义了额外几种迭代器包括：
+* 插入迭代器
+* 流迭代器
+* 反向迭代器
+* 移动迭代器
+
+##### 插入迭代器
+插入迭代器是一种迭代器适配器，它接受一个容器，生成一个迭代器，向插入迭代器赋值时，迭代器调用容器操作向容器指定位置插入一个元素。
+
+插入迭代器有三种:  
+`back_inserter`:创建使用`push_back`向容器添加元素的迭代器。  
+`front_inserter`:使用`push_front`向容器添加元素的迭代器。  
+`inserter`:该函数接受第二个参数，该参数是一个给定容器的迭代器，元素被插入到给定迭代器所表示的元素之前。
+
+```cpp
+*it = val; //it为由inserter生成的插入迭代器
+//等价于
+it = c.insert(it , val); //此时it指向新加入的元素
+++it;   //使it指向它原来的元素
+```
+
+##### 流迭代器  
+标准库定义了用于IO的流迭代器。`istream_iterator`读取输入流，`ostream_iterator`向一个输出流写数据。流迭代器将它们对应的流当作一个特定的序列来处理。该迭代器可以作为泛型算法的参数，来读取输入或者输出。  
+**默认初始化的流迭代器是一个尾后迭代器**
+```cpp
+istream_iterator<int> int_it(cin);//关联到cin的输入流迭代器
+istream_iterator<int> int_eof; //默认初始化的尾后迭代器
+ifstream in("afile");
+istream_iterator<string> str_it(in); //关联到一个文件流对象的流迭代器，从文件"afile"中读取字符串
+```
+>可以用流迭代器作为迭代器范围参数  
+
+用流迭代器范围构造一个vec:
+```cpp
+istream_iterator<int> in_iter(cin) , eof;
+vector<int> vec(in_iter , eof);
+```
+将流迭代器用于某些算法：
+```cpp
+istream_iterator<int> in(cin) , eof;
+cout << accumulate(in , eof , 0 ) << endl; //计算标准输入数据的和
+```
+
+输出流迭代器`ostream_iterator`  
+输出流迭代器可以有第二个参数，为一个C风格字符串，在输出每个元素后都会打印此字符串，不允许空`ostream_iterator`或者表示尾后位置的输出流迭代器。
+
+用`ostream_iterator`来输出值序列:  
+```cpp
+ostream_iterator<int> out_iter(cout , " ");
+for(auto e : vec)
+    *out_iter++ = e; //使用输出流迭代器输出元素
+cout << endl;
+```
+>PS : 运算符 `*`和 `++`实际上对out_iter不做任何事情  
+
+使用`copy`算法，将输出流迭代器作为输出来打印容器元素:
+```cpp
+copy(vec.begin() , vec.end() , out_iter);
+cout << end;
+```
+
+#### 反向迭代器
+
+![image.png](https://i.loli.net/2020/07/30/BekcasjUJnQbrWG.png)
+反向迭代器的`++`操作会使迭代器移动到前一个元素，`--`操作会使迭代器移动到下一个位置  
+调用反向迭代器的base()成员函数返回该迭代器对应的普通迭代器。
+```cpp
+cout << string(rcomma.base() , line.cend() ) << endl; 
+```
+
+#### 泛型算法结构
 
 
 
+### 关联容器
+>关联容器与顺序容器最根本的不同是关联容器按关键字来保存和访问元素。与之相对，顺序容器中的元素按其在容器中的位置来顺序保存与访问
 
+两个主要的关联容器:`map`、`set`。`map`中的元素是键值对(key-value)。`set`中每个元素只有一个关键字。
 
-​	
+标准库的八种关联容器：  
+按关键字有序保存：  
+`map`:  关联数组；保存 关键字-值 对  
+`set`:  关键字即值，只保存关键字的容器  
+`multimap`:关键字可重复的map  
+`multiset`:关键字可重复的set  
+无序集合：  
+`unordered_map`:用哈希组织的map  
+`unordered_set`:用哈希组织的set  
+`unordered_multimap`:哈希组织的map；关键字可重复出现  
+`unordered_multiset`：哈希组织的map；关键字可重复出现
+
+##### 使用`map`:  
+关联容器也是模板，定义时需要指定关键字和值的类型
+```cpp
+map<string , size_t> word_count; //定义一个string到size_t的空map
+```  ​	
 

@@ -11,6 +11,9 @@
 #include <list>
 #include <forward_list>
 #include <algorithm>
+#include <map>
+#include <set>
+#include <utility>
 
 
 using namespace std;
@@ -18,17 +21,24 @@ using namespace std;
 
 int main()
 {
-    vector<string> lc(12, "bca");
-    vector<const char*> lc2(12, "bc");
-    cout << equal(lc.cbegin(), lc.cend(), lc2.cbegin()) << endl;//#1 输出0
+    vector<string> v1={"a","b","c","d","e"};
+    vector<int> v2={1,2,3,4,5};
 
-    vector<const char*> lc3(12, "bca");
-    vector<const char*> lc4(12, "bca");
-    cout << equal(lc3.cbegin(), lc3.cend(), lc4.cbegin()) << endl;//#2 输出1
+    vector<pair<string,int>> v3;
+    
+    pair<string,int> p;
 
-    cout<< typeid(*lc3.begin()).name()<<endl;//#3 char const *
+    for(decltype(v1.size()) i=0 ; i != v1.size() ; ++i)
+    {
+        p.first = v1[i];
+        p.second = v2[i];
+        v3.push_back(p);
+    }
 
-    cout<< (*lc3.begin()==*lc4.begin())<<endl;//# 4编译通过  输出1
+    for(const auto &t : v3 )
+    {
+        cout << t.first << " " << t.second << endl;
+    }
 
     system("pause");
 
