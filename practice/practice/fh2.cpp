@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 
+typedef char elemtypedate;
+
 using namespace std;
 
 struct ListNode

@@ -1,52 +1,31 @@
 #include <iostream>
-#include <string>
-#include <windows.h>
-#include <cctype>
-#include <typeinfo>
-#include <vector> 
-#include <iterator>
-#include <fstream>
-#include <sstream>
-#include <deque>
-#include <list>
-#include <forward_list>
-#include <algorithm>
-#include <map>
-#include <set>
-#include <utility>
+#include <string>  //string
 
-using namespace std;
+using std::cin;
+using namespace std;  //using 声明
 
+
+struct Sales_data { 
+
+    std::string bookNo;
+    unsigned units_sold = 0;
+    double revenue = 0.00;
+};
 
 int main()
 {
-    vector<int> v1;
-
-
-    class Hasptr{
-        public:
-
-            ~Hasptr(){
-                delete(ps);
-            }
-
-            Hasptr(const std::string &s = std::string()):
-                ps(new std::string(s)) , i(0){}
-
-            Hasptr(Hasptr &orig):
-                ps(new std::string(*orig.ps)) , i(orig.i){}
-            //拷贝构造函数
-        private:
-            std::string *ps;
-            int i; 
-    };
-
-    int i;
-
-    int &&i=42;
 
     
-    system("pause");
+    Sales_data data1,data2;
+    double price = 0;
 
-    return 0;
-} 
+    std::cin >> data1.bookNo >> data1.units_sold >> price;
+    data1.revenue = data1.units_sold * price;
+
+    std::cin >> data2.bookNo >> data2.units_sold >> price;
+    data2.revenue = data2.units_sold * price;
+
+    
+
+}
+
